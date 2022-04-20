@@ -1,1 +1,1 @@
-{"base": "9ffc2a7", "parent": "debian/rolling/rc_common_msgs", "previous": "682e937", "trim": "", "trimbase": ""}
+{"base": "74afc73", "parent": "debian/humble/rc_common_msgs", "previous": "29e93fa", "trim": "", "trimbase": ""}
