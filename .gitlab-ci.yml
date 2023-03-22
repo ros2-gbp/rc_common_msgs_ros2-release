@@ -1,0 +1,137 @@
+before_script:
+  - export DEBIAN_FRONTEND=noninteractive
+  - apt-get update -yq && apt-get install -y curl lsb-release lintian
+  - export DISTRO_CODENAME=`lsb_release -cs` && echo Using distro $DISTRO_CODENAME
+  - echo Using ROS_DISTRO $ROS_DISTRO
+  - rosdep install --from-paths . --ignore-src -r -y
+  - export CMAKE_PREFIX_PATH="/opt/ros/$ROS_DISTRO"
+
+variables:
+  GET_SOURCES_ATTEMPTS: "3"
+  GIT_DEPTH: "0"
+
+#########################
+# Templates using anchors
+#########################
+.amd64_dashing_t: &amd64_dashing_job
+  image: ros:dashing-ros-base-bionic
+  tags:
+    - amd64
+    - docker
+
+.armhf_dashing_t: &armhf_dashing_job
+  image: ros:dashing-ros-base-bionic
+  tags:
+    - armhf
+    - docker
+
+.amd64_eloquent_t: &amd64_eloquent_job
+  image: ros:eloquent-ros-base-bionic
+  tags:
+    - amd64
+    - docker
+
+.amd64_foxy_t: &amd64_foxy_job
+  image: ros:foxy-ros-base-focal
+  tags:
+    - amd64
+    - docker
+
+#############
+# Templates
+#############
+.test:
+  stage: test
+  script:
+    - mkdir build && cd build
+    - cmake ..
+    - make -j 4
+    - CTEST_OUTPUT_ON_FAILURE=1 make test
+
+# Debian packaging
+.package:
+  stage: deploy
+  script:
+    - mkdir build && cd build
+    - cmake -DCMAKE_INSTALL_PREFIX="/opt/ros/$ROS_DISTRO" -DCMAKE_BUILD_TYPE=Release ..
+    - make -j 4
+    - make package
+    - if [ -z "$APT_REPO" ]; then export APT_REPO=testing; fi
+    - upload_deb.sh $DISTRO_CODENAME-$APT_REPO *.deb
+
+.package_testing:
+  extends: .package
+  only:
+    - master
+  except:
+    - tags
+  variables:
+    TESTING_DEBS: "true"
+    APT_REPO: "testing"
+
+.package_stable:
+  extends: .package
+  only:
+    - /^v[0-9]+\.[0-9]+\.[0-9]+/
+  except:
+    - branches
+  variables:
+    APT_REPO: "stable"
+
+##############
+#### Jobs ####
+##############
+
+# Test (on every commit)
+########################
+test:dashing:amd64:
+  <<: *amd64_dashing_job
+  extends: .test
+
+test:dashing:armhf:
+  <<: *armhf_dashing_job
+  extends: .test
+
+test:eloquent:amd64:
+  <<: *amd64_eloquent_job
+  extends: .test
+
+test:foxy:amd64:
+  <<: *amd64_foxy_job
+  extends: .test
+
+# Deploy testing (only on master)
+#################################
+package_testing:dashing:amd64:
+  <<: *amd64_dashing_job
+  extends: .package_testing
+
+package_testing:dashing:armhf:
+  <<: *armhf_dashing_job
+  extends: .package_testing
+
+package_testing:eloquent:amd64:
+  <<: *amd64_eloquent_job
+  extends: .package_testing
+
+package_testing:foxy:amd64:
+  <<: *amd64_foxy_job
+  extends: .package_testing
+
+# Deploy stable (only for releases, version tags)
+#################################################
+package_stable:dashing:amd64:
+  <<: *amd64_dashing_job
+  extends: .package_stable
+
+package_stable:dashing:armhf:
+  <<: *armhf_dashing_job
+  extends: .package_stable
+
+package_stable:eloquent:amd64:
+  <<: *amd64_eloquent_job
+  extends: .package_stable
+
+package_stable:foxy:amd64:
+  <<: *amd64_foxy_job
+  extends: .package_stable
