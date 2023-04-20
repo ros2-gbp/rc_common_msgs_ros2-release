@@ -1,0 +1,31 @@
+ros-iron-rc-common-msgs (0.5.3-5jammy) jammy; urgency=high
+
+  * CI changes only: also build for focal/foxy
+
+ -- Felix Ruess <felix.ruess@roboception.de>  Mon, 17 Aug 2020 16:00:00 -0000
+
+ros-iron-rc-common-msgs (0.5.2-5jammy) jammy; urgency=high
+
+  * add TIMEOUT_REACHED
+
+ -- Felix Ruess <felix.ruess@roboception.de>  Mon, 13 Jul 2020 16:00:00 -0000
+
+ros-iron-rc-common-msgs (0.5.1-5jammy) jammy; urgency=high
+
+  * add reserved constansts -3, 11 and 999
+
+ -- Felix Ruess <felix.ruess@roboception.de>  Sun, 28 Jun 2020 16:00:00 -0000
+
+ros-iron-rc-common-msgs (0.5.0-5jammy) jammy; urgency=high
+
+  * Added array key/value list for extra data to CameraParam message and removed 'noise' field (will be provided in extra_data)
+
+ -- Felix Ruess <felix.ruess@roboception.de>  Mon, 25 May 2020 16:00:00 -0000
+
+ros-iron-rc-common-msgs (0.4.1-5jammy) jammy; urgency=high
+
+  * intial port to ROS2
+
+ -- Felix Ruess <felix.ruess@roboception.de>  Mon, 09 Mar 2020 16:00:00 -0000
+
+
